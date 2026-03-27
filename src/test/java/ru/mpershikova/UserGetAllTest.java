@@ -3,6 +3,7 @@ package ru.mpershikova;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserGetAllTest {
@@ -10,11 +11,13 @@ public class UserGetAllTest {
     @Test
     void getAllUsersTest() throws Exception {
         // Убедиться, что БД не пустая
-        long count = DbHelper.getUsersCount();
-        assertTrue(count > 0, "В БД есть пользователи");
+        long dbCount = DbHelper.getUsersCount();
+        assertTrue(dbCount > 0, "В БД есть пользователи");
 
         String url = "http://localhost:8080/api/v1/users?page=0&size=1&sort=desc";
         JsonNode response = HttpHelper.doGet(url);
+
+        System.out.println("Полный ответ API: " + response.toPrettyString());
 
         // Проверяем, что есть все поля
         assertTrue(response.has("totalElements"), "Должно быть поле totalElements");
@@ -28,6 +31,15 @@ public class UserGetAllTest {
         assertTrue(response.has("numberOfElements"), "Должно быть поле numberOfElements");
         assertTrue(response.has("pageable"), "Должно быть поле pageable");
         assertTrue(response.has("empty"), "Должно быть поле empty");
+
+        // Проверяем значения
+        assertEquals(1, response.get("size").asInt(), "size должен быть 1");
+        assertEquals(0, response.get("number").asInt(), "number должен быть 0");
+        assertEquals(dbCount, response.get("totalElements").asLong(), "totalElements должно совпадать с БД");
+
+        System.out.println("Все поля есть и значения совпадают с переданными");
+
+
 
     }
 }
