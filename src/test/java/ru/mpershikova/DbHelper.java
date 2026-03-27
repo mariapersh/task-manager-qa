@@ -11,7 +11,6 @@ public class DbHelper {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 
-    // Из UserGetTest: проверка, что пользователь существует
     public static boolean userExists(long userId) throws SQLException {
         String sql = "SELECT id FROM users WHERE id = ?";
         try (Connection conn = getConnection();
@@ -22,14 +21,6 @@ public class DbHelper {
         }
     }
 
-    public static ResultSet getUserByIdTest(long userId) throws SQLException {
-        Connection conn = getConnection();
-        String sql = "SELECT * FROM users WHERE id = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, userId);
-        return stmt.executeQuery();
-    }
-
     public static ResultSet getUserByEmail(String email) throws SQLException {
         Connection conn = getConnection();
         String sql = "SELECT * FROM users WHERE email = ?";
@@ -38,16 +29,22 @@ public class DbHelper {
         return stmt.executeQuery();
     }
 
-    public static long getAnyUserId() throws SQLException {
-        String sql = "SELECT id FROM users LIMIT 1";
-        try (Connection conn = getConnection();
-        PreparedStatement stmt = getConnection().prepareStatement(sql);
-        ResultSet rs = stmt.executeQuery()){
+    public static ResultSet getAnyUser() throws SQLException {
+        Connection conn = getConnection();
+        String sql = "SELECT * FROM users LIMIT 1";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        return stmt.executeQuery();
+    }
 
+    public static long getUsersCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
-                return rs.getLong("id");
+                return rs.getLong(1);
             } else {
-                throw new SQLException("В БД нет пользователей");
+                return 0;
             }
         }
     }
